@@ -1,3 +1,5 @@
+# python-package/employee_events/sql_execution.py
+
 from sqlite3 import connect
 from pathlib import Path
 from functools import wraps
@@ -5,7 +7,7 @@ import pandas as pd
 
 # Using pathlib, create a `db_path` variable
 # that points to the absolute path for the `employee_events.db` file
-#### YOUR CODE HERE
+db_path = (Path(__file__).resolve().parent / "employee_events.db").as_posix()
 
 
 # OPTION 1: MIXIN
@@ -16,18 +18,25 @@ class QueryMixin:
     # that receives an sql query as a string
     # and returns the query's result
     # as a pandas dataframe
-    #### YOUR CODE HERE
+    def pandas_query(self, sql: str) -> pd.DataFrame:
+        with connect(db_path) as con:
+            return pd.read_sql_query(sql, con)
 
     # Define a method named `query`
     # that receives an sql_query as a string
     # and returns the query's result as
     # a list of tuples. (You will need
     # to use an sqlite3 cursor)
-    #### YOUR CODE HERE
+    def query(self, sql: str) -> list[tuple]:
+        con = connect(db_path)
+        try:
+            cur = con.cursor()
+            return cur.execute(sql).fetchall()
+        finally:
+            con.close()
     
 
- 
- # Leave this code unchanged
+# Leave this code unchanged
 def query(func):
     """
     Decorator that runs a standard sql execution
